@@ -2,7 +2,6 @@ from datasets import Dataset
 from pathlib import Path
 from typing import List
 
-import pandas as pd
 
 
 def create_ds(src_trg: str)-> Dataset:
@@ -11,7 +10,7 @@ def create_ds(src_trg: str)-> Dataset:
     language-code string.
     """
     return Dataset.from_list(
-        [{'source':src, 'target':trg} for _, _, src, trg in read_file_and_split(src_trg)]
+        [{'source':src, 'target':trg.strip()} for _, _, src, trg in read_file_and_split(src_trg)]
         )
 
 
@@ -19,7 +18,7 @@ def read_file_and_split(src_trg: str)-> List:
     """ Creates an array of lines(str) having been split 
     on '\t' from a txt file.
     """
-    return [line.split("\t").strip() for line in open(get_txt_file(src_trg)).readlines()]
+    return [line.split("\t") for line in open(get_txt_file(src_trg)).readlines()]
 
 
 def get_txt_file(src_trg: str)-> str:

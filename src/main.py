@@ -1,11 +1,18 @@
 import argparse
-
-from transformers import AutoTokenizer, MarianMTModel
-
+import torch
+from transformers import (AutoTokenizer, MarianMTModel, 
+                          MBartForConditionalGeneration, MBart50TokenizerFast)
+from datasets import concatenate_datasets
 from preprocessing import create_ds
 from utils import lang_converter
 
+from marian import Marian
+from mbart import Mbart
+
+
 if __name__ == "__main__":
+
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-e", "--evaluate", choices=['deu-por', 'eng-fra', 'eng-spa'], type=str, required=True, action="store")
@@ -16,19 +23,15 @@ if __name__ == "__main__":
     src, trg = lang_converter(src_trg)
 
     # Bilingual model
-    model_name = f"Helsinki-NLP/opus-mt-{src}-{trg}"
-    model_marian = MarianMTModel.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    marian = Marian(src, trg, ds, device)
+    # Multilingual model
+    mbart = Mbart(src, trg, ds, device)
 
-    # for each model, get the custom bleu score
-    # for each model, use built in bleu score
-
-
-    # compare
+    models = [marian, mbart]
 
 
-    # compare multilingual class vs bilingual
-
-    # observations
-
-    # save visuals
+    for model in models:
+        res = ds.map(model.translate, batched=True)
+        print(f"running on {device}")
+        concatenated_dataset = concatenate_datasets([ds, res], axis=1)
+        print(concatenate_datasets)

@@ -8,6 +8,8 @@ torch = "*"
 transformers = "*"
 pandas = "*"
 datasets = "*"
+sentencepiece = "*"
+sacremoses = "*"
 
 [dev-packages]
 ipykernel = "*"
